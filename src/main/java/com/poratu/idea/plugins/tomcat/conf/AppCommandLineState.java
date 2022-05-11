@@ -155,6 +155,14 @@ public class AppCommandLineState extends JavaCommandLineState {
         }
         portShutdown.setAttribute("port", cfg.getAdminPort());
         portE.setAttribute("port", cfg.getPort());
+        
+        
+        String customExtraContext = cfg.getDocBase() + "/META-INF/context_extra_pre.xml";
+        File customExtraContextFile = new File(customExtraContext);
+        if (customExtraContextFile.exists()) {
+            org.w3c.dom.Document customExtraContextDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(customExtraContextFile);
+            hostNode.appendChild(customExtraContextDoc.getDocumentElement());
+        }
 
         Element contextE = doc.createElement("Context");
         String customContext = cfg.getDocBase() + "/META-INF/context_local.xml";
