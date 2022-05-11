@@ -161,7 +161,12 @@ public class AppCommandLineState extends JavaCommandLineState {
         File customExtraContextFile = new File(customExtraContext);
         if (customExtraContextFile.exists()) {
             org.w3c.dom.Document customExtraContextDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(customExtraContextFile);
-            hostNode.appendChild(customExtraContextDoc.getDocumentElement());
+            NodeList childNodes = customExtraContextDoc.getDocumentElement().getChildNodes();
+            if(childNodes != null &&  childNodes.getLength() > 0){
+                for (int i = 0; i < childNodes.getLength(); i++) {
+                    hostNode.appendChild(childNodes.item(i));
+                }
+            }
         }
 
         Element contextE = doc.createElement("Context");
