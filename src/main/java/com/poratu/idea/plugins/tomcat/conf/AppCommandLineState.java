@@ -13,9 +13,11 @@ import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.poratu.idea.plugins.tomcat.utils.PluginUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -157,14 +159,25 @@ public class AppCommandLineState extends JavaCommandLineState {
         portE.setAttribute("port", cfg.getPort());
         
         
-        String customExtraContext = cfg.getDocBase() + "/META-INF/context_extra_pre.xml";
+        String customExtraContext = cfg.getDocBase() + "/META-INF/additional_context_config_before.xml";
         File customExtraContextFile = new File(customExtraContext);
         if (customExtraContextFile.exists()) {
             org.w3c.dom.Document customExtraContextDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(customExtraContextFile);
             NodeList childNodes = customExtraContextDoc.getDocumentElement().getChildNodes();
             if(childNodes != null &&  childNodes.getLength() > 0){
                 for (int i = 0; i < childNodes.getLength(); i++) {
-                    hostNode.appendChild(childNodes.item(i));
+                    Node node = childNodes.item(i);
+                    if(node instanceof Element){
+                        Element contextElement = (Element)node;
+                        String docBase = contextElement.getAttribute("docBase");
+                        String path = contextElement.getAttribute("path");
+                        String reloadable = contextElement.getAttribute("reloadable");
+                        Element context = doc.createElement("Context");
+                        context.setAttribute("docBase", StringUtils.isEmpty(docBase) ? "":docBase);
+                        context.setAttribute("path", StringUtils.isEmpty(path) ? "":path);
+                        context.setAttribute("reloadable", StringUtils.isEmpty(reloadable) ? "":"false");
+                        hostNode.appendChild(context);
+                    }
                 }
             }
         }
